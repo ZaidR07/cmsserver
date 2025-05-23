@@ -1,0 +1,10 @@
+{"level":"error","message":"Client not found: 1","timestamp":"2025-05-22T10:36:48.814Z"}
+{"level":"error","message":"Client not found: 1","timestamp":"2025-05-23T05:38:50.981Z"}
+{"level":"error","message":"Client not found: 1","timestamp":"2025-05-23T05:39:44.085Z"}
+{"level":"error","message":"Required fields are missing","timestamp":"2025-05-23T05:40:17.698Z"}
+{"level":"error","message":"Client not found: 1","timestamp":"2025-05-23T05:40:39.932Z"}
+{"level":"error","message":"Client not found: 1","timestamp":"2025-05-23T05:41:01.545Z"}
+{"level":"error","message":"Client not found: 1","timestamp":"2025-05-23T05:41:34.529Z"}
+{"level":"error","message":"Login failed: mainDb.useDb is not a function","timestamp":"2025-05-23T05:42:24.214Z"}
+{"level":"error","message":"Invalid admin credentials for client: 1","timestamp":"2025-05-23T05:42:51.508Z"}
+{"level":"info","message":"Login successful for admin: zaid in client: 1","timestamp":"2025-05-23T05:43:58.959Z"}

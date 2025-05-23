@@ -1,0 +1,1 @@
+export const secretkey = "gshgdhvb@@$3242dnvdnvdn11111"

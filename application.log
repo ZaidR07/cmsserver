@@ -8,3 +8,58 @@
 {"level":"error","message":"Login failed: mainDb.useDb is not a function","timestamp":"2025-05-23T05:42:24.214Z"}
 {"level":"error","message":"Invalid admin credentials for client: 1","timestamp":"2025-05-23T05:42:51.508Z"}
 {"level":"info","message":"Login successful for admin: zaid in client: 1","timestamp":"2025-05-23T05:43:58.959Z"}
+{"level":"error","message":"Required fields are missing","timestamp":"2025-06-04T07:20:49.226Z"}
+{"level":"error","message":"Required fields are missing","timestamp":"2025-06-04T07:20:53.913Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-04T07:22:21.556Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-04T07:22:57.251Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-04T07:23:04.359Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-04T07:24:16.546Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-04T07:25:25.439Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-04T07:26:09.740Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:26:57.827Z"}
+{"level":"error","message":"Login failed: Cannot access 'clientDb' before initialization","timestamp":"2025-06-04T07:28:01.392Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:28:17.369Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:31:09.600Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:31:49.113Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:32:41.198Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:33:00.481Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:33:00.485Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:33:25.901Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:33:25.905Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:37:40.057Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:37:40.060Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:38:01.884Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:38:01.887Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:38:52.144Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:38:52.146Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:39:29.914Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:39:29.917Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:39:37.956Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-04T07:39:54.455Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:39:58.967Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:39:58.968Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T07:40:33.070Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T07:40:33.071Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T08:06:04.634Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T08:06:04.637Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T08:06:25.767Z"}
+{"level":"error","message":"Login failed: encrpteddata is not a function","timestamp":"2025-06-04T08:06:25.770Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T08:09:33.226Z"}
+{"level":"error","message":"Login failed: encrpteddata is not defined","timestamp":"2025-06-04T08:09:33.228Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T08:09:56.164Z"}
+{"level":"error","message":"Login failed: encrpteddata is not defined","timestamp":"2025-06-04T08:09:56.166Z"}
+{"level":"info","message":"Login successful for admin: zaidrahman342@gmail.com in client: 100001","timestamp":"2025-06-04T08:10:05.718Z"}
+{"level":"error","message":"Login failed: encrpteddata is not defined","timestamp":"2025-06-04T08:10:05.719Z"}
+{"level":"error","message":"Client not found: tiwarimohan522@gmail.com","timestamp":"2025-06-05T10:21:40.934Z"}
+{"level":"error","message":"Client not found: zaidrahman342@gmail.com","timestamp":"2025-06-05T10:22:03.119Z"}
+{"level":"error","message":"Client not found: zaidrahman342@gmail.com","timestamp":"2025-06-05T10:22:50.493Z"}
+{"level":"error","message":"Client not found: zaidrahman342@gmail.com","timestamp":"2025-06-05T10:23:32.312Z"}
+{"level":"error","message":"Client not found: zaidrahman342@gmail.com","timestamp":"2025-06-05T10:24:14.496Z"}
+{"level":"error","message":"Login failed: m is not defined","timestamp":"2025-06-05T10:26:25.917Z"}
+{"level":"error","message":"Login failed: Unsupported data type","timestamp":"2025-06-05T10:31:58.491Z"}
+{"level":"error","message":"Login failed: Unsupported data type","timestamp":"2025-06-05T10:32:12.087Z"}
+{"level":"error","message":"Login failed: Unsupported data type","timestamp":"2025-06-05T10:32:21.637Z"}
+{"level":"error","message":"Login failed: Unsupported data type","timestamp":"2025-06-05T10:33:33.567Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-05T10:52:18.369Z"}
+{"level":"error","message":"Client not found: zaidrahman342@gmail.com","timestamp":"2025-06-09T04:15:37.021Z"}
+{"level":"error","message":"Client not found: 10001","timestamp":"2025-06-09T07:33:48.752Z"}

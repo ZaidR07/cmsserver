@@ -1,15 +1,19 @@
+"use client"
+
 import mongoose from 'mongoose';
 import { logger } from '../logger.js';
-import { decryptData } from '../util/Data_protection.js';
+import { decryptData, encryptData } from '../util/Data_protection.js';
+
 
 const key = process.env.KEY;
 
 // Login function
-export const AdminLogin = async (req, res) => {
+export const AdminLogin = async (req, res) => { 
 
-    const encrpteddata = decryptData(req.body , key);
 
-    const { client_id, admin_id, password } = encrpteddata;
+    const decrpteddata = decryptData(req.body , key);
+
+    const { client_id, admin_id, password } = decrpteddata;
 
     // Validate required fields
     if (!client_id || !admin_id || !password) {
@@ -23,8 +27,12 @@ export const AdminLogin = async (req, res) => {
         // Access the main database (classesmanagementsystem)
         const mainDb = mongoose.connection;
 
+      
+       
         // Query the clients collection to find the client
-        const client = await mainDb.collection('client').findOne({ client_id });
+        const client = await mainDb.collection('clients').findOne({ client_id : parseInt(client_id) });
+
+      
 
         if (!client) {
             logger.error(`Client not found: ${client_id}`);
@@ -42,29 +50,47 @@ export const AdminLogin = async (req, res) => {
             });
         }
 
+        
+
         // Switch to the client-specific database
         const clientDb = mainDb.useDb(clientDbName, { useCache: true });
 
         // Example: Query the admins collection in the client-specific database
         const admin = await clientDb.collection('admin').findOne({
-            admin_id,
-            password, // Note: In production, use proper password hashing (e.g., bcrypt)
+           admin_id : admin_id
         });
 
-
+       
         if (!admin) {
             logger.error(`Invalid admin credentials for client: ${client_id}`);
-            return res.status(401).json({
-                message: 'Invalid admin credentials',
+            return res.status(404).json({
+                message: 'Invalid adminID credentials',
             });
         }
 
-        // Successful login
-        logger.info(`Login successful for admin: ${admin_id} in client: ${client_id}`);
+        if(decryptData(admin.password,process.env.KEY) != password){
+            return res.status(401).json({
+                message : "Incorrect Password"
+            })
+           
+        }
+
+       
+        
+        const encrytedrank = encryptData( admin.rank , process.env.KEY);
+
+        const encryteddbname = encryptData(client.dbname , process.env.KEY);
+
+        
         return res.status(200).json({
             message: 'Login successful',
-            data: { client_id, admin_id },
+            payload: {
+                rank : encrytedrank,
+                db : encryteddbname,
+                email : admin_id
+            },
         });
+
     } catch (error) {
         logger.error(`Login failed: ${error.message}`);
         return res.status(500).json({

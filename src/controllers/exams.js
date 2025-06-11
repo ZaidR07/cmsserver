@@ -84,8 +84,6 @@ export const getExams = async (req, res) => {
 };
 
 export const studentExamLogin = async (req, res) => {
- 
-
   const { student_id, exam_id, password, dbname } = req.body.payload;
 
   try {
@@ -181,7 +179,6 @@ export const studentExamSubmit = async (req, res) => {
     return res.status(200).json({
       message: "Submitted Successfully",
     });
-
   } catch (error) {
     logger.error(error);
     return res.status(500).json({
@@ -190,10 +187,43 @@ export const studentExamSubmit = async (req, res) => {
   }
 };
 
-export const getExamParticipants = async (req , res) => {
-  const {exam_id , db} = req.body.payload;
+export const getExamParticipants = async (req, res) => {
+  try {
+    const { exam_id, db } = req.query;
 
-  
+    if (!exam_id || !db) {
+      return res.status(400).json({ message: "exam_id and db are required" });
+    }
 
+    const database = mongoose.connection;
+    const classesdb = database.useDb(db, { useCache: true });
 
-}
+    // Step 1: Find the exam
+    const exam = await classesdb
+      .collection("exams")
+      .findOne({ exam_id: parseInt(exam_id) });
+
+    if (!exam) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    const participantIds = exam.participants || [];
+
+    if (participantIds.length === 0) {
+      return res
+        .status(200)
+        .json({ payload: { exam: exam, participants: [] } });
+    }
+
+    // Step 2: Fetch student details
+    const students = await classesdb
+      .collection("students")
+      .find({ student_id: { $in: participantIds } })
+      .toArray();
+
+    return res.status(200).json({ payload: { exam: exam, participants : students } });
+  } catch (error) {
+    console.error("Error fetching exam participants:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

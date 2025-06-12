@@ -1,9 +1,8 @@
 import s3Client from "../util/s3Client.js";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import mongoose from "mongoose";
+import mongoose, { disconnect } from "mongoose";
 import { logger } from "../logger.js";
-
-
+import { generateReceipt } from "../util/receiptgenerator.js";
 
 export const AddUpdateStudent = async (req, res) => {
   try {
@@ -34,6 +33,7 @@ export const AddUpdateStudent = async (req, res) => {
     delete data.folder;
     delete data.status;
     delete data.form_no;
+    delete data.exams;
 
     // Convert any number fields if needed
     if (data.student_id) data.student_id = parseInt(data.student_id);
@@ -85,6 +85,36 @@ export const AddUpdateStudent = async (req, res) => {
       .findOne({}, { sort: { form_no: -1 } });
 
     const form_no = LastForm ? LastForm.form_no + 1 : 101;
+
+    const LastReceipt = await classesdb
+      .collection("form")
+      .findOne({}, { sort: { form_no: -1 } });
+
+    const receiptno = LastReceipt ? LastReceipt.receiptno + 1 : 101;
+
+    const receiptdata = {
+      receiptno: receiptno,
+      student_id: data.student_id,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      course: data.course,
+      totalPayment: parseInt(data.totalPayment),
+      discount: parseInt(data.discount),
+      payment: parseInt(data.payment),
+      paymentmode: data.paymentmode,
+      createdAt: new Date(),
+    };
+
+    await classesdb.collection("receipts").insertOne(receiptdata);
+
+    const receiptformat = await classesdb.collection("receiptformat").find({}).toArray();
+
+    await generateReceipt(receiptdata, receiptformat[0], "./generated_bills");
+
+    delete data.paymentmode;
+    if (data?.chequeNo) {
+      delete data.chequeNo;
+    }
 
     const newStudent = {
       ...data,

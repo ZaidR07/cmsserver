@@ -1,30 +1,36 @@
 import puppeteer from "puppeteer";
 import fs from "fs";
 import path from "path";
+import { formatToDDMMYYYY } from "./DateConverter.js";
 
-const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./bills") => {
+export const generateReceipt = async (
+  billData = {},
+  receiptformat = {},
+  outputPath = "./bills",
+  previousreceipts
+) => {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {
+    // const previousreceipts = await classesdb
+    //       .collection("receipts")
+    //       .find({
+    //         student_id: data.student_id,
+    //         course: data.course,
+    //       })
+    //       .sort({ createdAt: 1 }) // ascending order => earliest first
+    //       .toArray();
+
+    console.log(receiptformat);
+    
+
     const page = await browser.newPage();
 
-    // Default dummy data
-    const defaultData = {
-      receiptNo: "8209112035",
-      date: new Date().toLocaleDateString("en-IN"),
-      studentName: "RAHUL SHARMA",
-      course: "ADVANCED DIPLOMA IN COMPUTER APPLICATION",
-      paymentMode: "Cash",
-      chequeNo: "",
-      amount: 5000,
-      balanceDue: "2000",
-    };
-
     // Merge provided data with defaults
-    const data = { ...defaultData, ...billData , ...billformat};
+    const data = { ...billData, ...receiptformat };
 
     // Helper function to convert numbers to words (Indian format)
     function numberToWords(num) {
@@ -153,8 +159,8 @@ const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./
             }
             
             .header-text {
-                background-color: ${data.headerbgcolor};
-                color: ${data.headercolor};
+                background-color: ${data.headerBackground};
+                color: ${data.headerColor};
                 padding: 15px;
                 margin: 10px 0;
                 font-weight: bold;
@@ -164,7 +170,7 @@ const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./
             }
             
             .institute-info {
-                background: linear-gradient(45deg, #ff6b35, #f7931e);
+                 background-color: ${data.secondHeaderBackground};
                 color: white;
                 padding: 8px;
                 font-size: 12px;
@@ -297,38 +303,42 @@ const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./
             
             
             <div class="receipt-header">
-                <div>No: ${data.receiptNo}</div>
-                <div>Date: ${data.date}</div>
+                <div>No: ${data.receiptno}</div>
+                <div>Date: ${formatToDDMMYYYY(data.createdAt)}</div>
             </div>
             
             <div class="form-section">
                 <div class="form-row">
                     <span class="form-label">Received with thanks from:</span>
-                    <span class="form-input">${data.studentName}</span>
+                    <span class="form-input">${data.firstName} ${
+                      data.lastName
+                    }</span>
                 </div>
                 
                 <div class="form-row">
                     <span class="form-label">the sum of Rupees:</span>
-                    <span class="form-input">${numberToWords(data.amount)} Only</span>
+                    <span class="form-input">${numberToWords(
+                      data.payment
+                    )} Only</span>
                 </div>
                 
                 <div class="payment-section">
                     <span class="form-label">Paid by:</span>
                     <div class="payment-method">
-                        <span class="checkbox ${data.paymentMode === "Cash" ? "checked" : ""}">
-                            ${data.paymentMode === "Cash" ? "✓" : ""}
+                        <span class="checkbox ${data.paymentmode === "Cash" ? "checked" : ""}">
+                            ${data.paymentmode === "Cash" ? "✓" : ""}
                         </span>
                         <span>Cash</span>
                     </div>
                     <div class="payment-method">
-                        <span class="checkbox ${data.paymentMode === "Online" ? "checked" : ""}">
-                            ${data.paymentMode === "Online" ? "✓" : ""}
+                        <span class="checkbox ${data.paymentmode === "UPI" ? "checked" : ""}">
+                            ${data.paymentmode === "UPI" ? "✓" : ""}
                         </span>
-                        <span>Online</span>
+                        <span>UPI</span>
                     </div>
                     <div class="payment-method">
-                        <span class="checkbox ${data.paymentMode === "Cheque" ? "checked" : ""}">
-                            ${data.paymentMode === "Cheque" ? "✓" : ""}
+                        <span class="checkbox ${data.paymentmode === "Cheque" ? "checked" : ""}">
+                            ${data.paymentmode === "Cheque" ? "✓" : ""}
                         </span>
                         <span>Cheque</span>
                     </div>
@@ -339,7 +349,7 @@ const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./
                 </div>
                 
                 <div class="balance-due">
-                    <strong>Balance Due: ₹${data.balanceDue}</strong>
+                    <strong>Balance Due: ₹${data.totalPayment} - ${data.discount} - ${data.payment}</strong>
                 </div>
                 
                 <div class="note-section">
@@ -391,7 +401,7 @@ const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./
     }
 
     // Generate filename based on student name and receipt number
-    const filename = `AICI_Bill_${data.studentName.replace(/\s+/g, "_")}_${data.receiptNo}.pdf`;
+    const filename = `AICI_Bill_${data.firstName.replace(/\s+/g, "_")}_${data.receiptno}.pdf`;
     const filePath = path.join(outputPath, filename);
 
     // Write PDF to file
@@ -405,7 +415,3 @@ const generateAICIBill = async (billData = {}, billformat = {}, outputPath = "./
 };
 
 // Example usage:
-generateAICIBill(
-  { studentName: "John Doe", receiptNo: "12345" },
-  "./generated_bills"
-);

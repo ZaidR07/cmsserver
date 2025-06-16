@@ -16,8 +16,9 @@ import {
   studentExamLogin,
   studentExamSubmit,
 } from "./controllers/exams.js";
-import { AddCourse, GetCourses } from "./controllers/courses.js";
+import { AddCourse, DeleteCourse, GetCourses } from "./controllers/courses.js";
 import { AddUpdateReceipt, GetReceiptFormat } from "./controllers/receiptformat.js";
+import { AddUpdateCertificateFormat } from "./controllers/certificateformat.js";
 
 // Initialize multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() }); // Store files in memory
@@ -42,11 +43,14 @@ approuter.post("/api/createexam", CreateExam);
 approuter.get("/api/getexams", getExams);
 approuter.post("/api/studentexamlogin", studentExamLogin);
 approuter.get("/api/getexamparticipants", getExamParticipants);
+approuter.post("/api/studentexamsubmit", studentExamSubmit);
+
 
 //Courses Routes
 approuter.post("/api/addupdatecourse", upload.single("image"), AddCourse);
 approuter.get("/api/getcourses", GetCourses);
-approuter.post("/api/studentexamsubmit", studentExamSubmit);
+approuter.delete("/api/deletecourse", DeleteCourse);
+
 
 approuter.post(
   "/api/addupdatereceipt",
@@ -57,5 +61,15 @@ approuter.post(
   AddUpdateReceipt
 );
 approuter.get("/api/getreceiptformat" , GetReceiptFormat)
+
+approuter.post(
+  "/api/addupdatecertificatedata",
+  // upload.fields([
+  //   { name: "logo", maxCount: 1 },
+  //   { name: "signature", maxCount: 1 },
+  // ])
+  AddUpdateCertificateFormat
+ 
+);
 
 export default approuter;

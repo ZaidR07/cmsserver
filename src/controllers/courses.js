@@ -126,3 +126,40 @@ export const GetCourses = async (req, res) => {
     });
   }
 };
+
+export const DeleteCourse = async (req, res) => {
+  try {
+    const { course_id, db } = req.query;
+
+    if (!course_id || !db) {
+      return res.status(400).json({
+        message: "Required Fields are Missing",
+        status: false,
+      });
+    }
+
+    const database = mongoose.connection;
+    const classesdb = database.useDb(db, { useCache: true });
+
+    const result = await classesdb.collection("courses").deleteOne({ course_id: parseInt(course_id)  });
+
+    // Check if a document was actually deleted
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        message: `Course with course_id ${course_id} not found`,
+        status: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Deleted Successfully",
+      status: true,
+    });
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).json({
+      message: "Server Error",
+      status: false,
+    });
+  }
+};

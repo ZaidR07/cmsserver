@@ -76,3 +76,44 @@
 {"errorLabelSet":{},"level":"error","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{"93.127.167.233:27017":{"$clusterTime":null,"address":"93.127.167.233:27017","arbiters":[],"electionId":null,"error":{"beforeHandshake":false,"errorLabelSet":{}},"hosts":[],"iscryptd":false,"lastUpdateTime":1820033099,"lastWriteDate":0,"logicalSessionTimeoutMinutes":null,"maxBsonObjectSize":null,"maxMessageSizeBytes":null,"maxWireVersion":0,"maxWriteBatchSize":null,"me":null,"minRoundTripTime":0,"minWireVersion":0,"passives":[],"primary":null,"roundTripTime":-1,"setName":null,"setVersion":null,"tags":{},"topologyVersion":null,"type":"Unknown"}},"setName":null,"stale":false,"type":"Single"},"timestamp":"2025-06-12T12:20:27.470Z"}
 {"errorLabelSet":{},"level":"error","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{"93.127.167.233:27017":{"$clusterTime":null,"address":"93.127.167.233:27017","arbiters":[],"electionId":null,"error":{"beforeHandshake":false,"errorLabelSet":{}},"hosts":[],"iscryptd":false,"lastUpdateTime":1820033099,"lastWriteDate":0,"logicalSessionTimeoutMinutes":null,"maxBsonObjectSize":null,"maxMessageSizeBytes":null,"maxWireVersion":0,"maxWriteBatchSize":null,"me":null,"minRoundTripTime":0,"minWireVersion":0,"passives":[],"primary":null,"roundTripTime":-1,"setName":null,"setVersion":null,"tags":{},"topologyVersion":null,"type":"Unknown"}},"setName":null,"stale":false,"type":"Single"},"timestamp":"2025-06-12T12:20:27.472Z"}
 {"errorLabelSet":{},"level":"error","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{"93.127.167.233:27017":{"$clusterTime":null,"address":"93.127.167.233:27017","arbiters":[],"electionId":null,"error":{"beforeHandshake":false,"errorLabelSet":{}},"hosts":[],"iscryptd":false,"lastUpdateTime":1820033614,"lastWriteDate":0,"logicalSessionTimeoutMinutes":null,"maxBsonObjectSize":null,"maxMessageSizeBytes":null,"maxWireVersion":0,"maxWriteBatchSize":null,"me":null,"minRoundTripTime":0,"minWireVersion":0,"passives":[],"primary":null,"roundTripTime":-1,"setName":null,"setVersion":null,"tags":{},"topologyVersion":null,"type":"Unknown"}},"setName":null,"stale":false,"type":"Single"},"timestamp":"2025-06-12T12:20:27.750Z"}
+{"level":"error","message":"Error Adding/Updating Student: chequeNo is not defined","stack":"ReferenceError: chequeNo is not defined\n    at AddUpdateStudent (file:///D:/Client%20Master/cms%20software/server/src/controllers/student.js:109:5)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","timestamp":"2025-06-12T16:14:22.636Z"}
+{"level":"error","message":"Client not found: 100001","timestamp":"2025-06-16T06:30:15.606Z"}
+{"level":"error","message":"Invalid admin credentials for client: 100001","timestamp":"2025-06-16T06:34:29.538Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:35:12.839Z"}
+{"level":"error","message":"Login failed: c is not defined","timestamp":"2025-06-16T06:36:30.710Z"}
+{"level":"error","message":"Login failed: decrpteddata is not a function","timestamp":"2025-06-16T06:37:04.530Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:37:14.177Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:38:18.240Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:46:46.518Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:47:22.243Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:47:48.165Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:51:42.638Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:52:30.399Z"}
+{"level":"error","message":"Login failed: butes is not defined","timestamp":"2025-06-16T06:52:46.417Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:52:53.534Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:53:32.227Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:53:55.738Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:54:31.922Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:56:48.250Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:19.749Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:25.178Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:25.960Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:26.151Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:26.303Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:26.484Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:26.623Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:26.775Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:26.931Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:27.089Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:27.207Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:27.368Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T06:58:41.080Z"}
+{"level":"error","message":"Login failed: Malformed UTF-8 data","timestamp":"2025-06-16T07:00:31.754Z"}
+{"level":"error","timestamp":"2025-06-16T11:25:43.268Z"}
+{"level":"error","timestamp":"2025-06-16T11:25:54.622Z"}
+{"level":"error","timestamp":"2025-06-16T11:26:15.703Z"}
+{"level":"error","timestamp":"2025-06-16T11:26:33.768Z"}
+{"level":"error","timestamp":"2025-06-16T11:28:13.559Z"}
+{"level":"error","timestamp":"2025-06-16T11:28:35.586Z"}
+{"level":"error","timestamp":"2025-06-16T11:33:42.500Z"}
+{"level":"error","message":"Error Adding/Updating Student: Cannot read properties of undefined (reading 'map')","stack":"TypeError: Cannot read properties of undefined (reading 'map')\n    at generateReceipt (file:///D:/Client%20Master/cms%20software/server/src/util/receiptgenerator.js:112:8)\n    at async AddUpdateStudent (file:///D:/Client%20Master/cms%20software/server/src/controllers/student.js:121:5)","timestamp":"2025-06-16T12:13:06.262Z"}

@@ -57,7 +57,7 @@ export const AdminLogin = async (req, res) => {
 
         // Example: Query the admins collection in the client-specific database
         const admin = await clientDb.collection('admin').findOne({
-           admin_id : admin_id
+           email  : admin_id
         });
 
        
@@ -68,6 +68,9 @@ export const AdminLogin = async (req, res) => {
             });
         }
 
+       
+    
+
         if(decryptData(admin.password,process.env.KEY) != password){
             return res.status(401).json({
                 message : "Incorrect Password"
@@ -75,7 +78,6 @@ export const AdminLogin = async (req, res) => {
            
         }
 
-       
         
         const encrytedrank = encryptData( admin.rank , process.env.KEY);
 

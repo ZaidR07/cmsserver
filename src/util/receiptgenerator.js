@@ -1,12 +1,14 @@
 import puppeteer from "puppeteer";
-import fs from "fs";
-import path from "path";
 import { formatToDDMMYYYY } from "./DateConverter.js";
+import s3Client from "./s3Client.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { Resend } from "resend";
+
+const resend = new Resend("re_ccuAZtfq_qWsMFDrWjLSwX1vt6qm5GFCp");
 
 export const generateReceipt = async (
   billData = {},
   receiptformat = {},
-  outputPath = "./bills",
   previousreceipts
 ) => {
   const browser = await puppeteer.launch({
@@ -15,24 +17,9 @@ export const generateReceipt = async (
   });
 
   try {
-    // const previousreceipts = await classesdb
-    //       .collection("receipts")
-    //       .find({
-    //         student_id: data.student_id,
-    //         course: data.course,
-    //       })
-    //       .sort({ createdAt: 1 }) // ascending order => earliest first
-    //       .toArray();
-
-    console.log(receiptformat);
-    
-
     const page = await browser.newPage();
-
-    // Merge provided data with defaults
     const data = { ...billData, ...receiptformat };
 
-    // Helper function to convert numbers to words (Indian format)
     function numberToWords(num) {
       const ones = [
         "",
@@ -75,12 +62,10 @@ export const generateReceipt = async (
 
       function convertHundreds(n) {
         let result = "";
-
         if (n >= 100) {
           result += ones[Math.floor(n / 100)] + " Hundred ";
           n %= 100;
         }
-
         if (n >= 20) {
           result += tens[Math.floor(n / 10)] + " ";
           n %= 10;
@@ -88,11 +73,9 @@ export const generateReceipt = async (
           result += teens[n - 10] + " ";
           return result;
         }
-
         if (n > 0) {
           result += ones[n] + " ";
         }
-
         return result;
       }
 
@@ -125,6 +108,13 @@ export const generateReceipt = async (
       }
     }
 
+    const notesHTML = data.notes
+      .map(
+        (note) =>
+          `<p style="font-size: 16px; color: #374151; margin: 0 0 4px;">${note}</p>`
+      )
+      .join("");
+
     const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
@@ -148,10 +138,11 @@ export const generateReceipt = async (
             }
             
             .header {
-                text-align: center;
-                padding: 10px;
-                border-bottom: 2px solid #000;
+              
+              padding: 10px;
+              border-bottom: 2px solid #000;
             }
+
             
             .header img {
                 max-width: 100%;
@@ -159,14 +150,27 @@ export const generateReceipt = async (
             }
             
             .header-text {
+            display: flex;
+              justify-content: center;
+              gap: 5%;
                 background-color: ${data.headerBackground};
                 color: ${data.headerColor};
                 padding: 15px;
                 margin: 10px 0;
                 font-weight: bold;
-                font-size: 24px;
+                font-size: 20px;
                 text-transform: uppercase;
                 letter-spacing: 2px;
+            }
+
+            .logo{
+              width : 20%;
+              max-height : 20vw;
+            }
+
+            .signatureimg{
+              width : 20%;
+              max-height : 20vw;
             }
             
             .institute-info {
@@ -270,14 +274,15 @@ export const generateReceipt = async (
             
             .note-section {
                 margin-top: 20px;
-                font-size: 12px;
+                font-size: 16px;
             }
             
             .signature-section {
+                width : 20%;
+                margin-left: 75%;
                 text-align: center;
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px solid #ccc;
+                
+               
             }
             
             .balance-due {
@@ -292,18 +297,21 @@ export const generateReceipt = async (
     </head>
     <body>
         <div class="bill-container">
-                <div class="header">
-                    <div class="header-text">AICI COMPUTER INSTITUTE</div>
-                    <div class="institute-info">AN ISO 9001:2015 CERTIFIED COMPANY</div>
-                    <div class="contact-info">
-                        Contact: 8209112035 / 7676804850<br>
-                        Address: Shop No 411, 2nd Floor, Retail Shopping Complex Opp IIT Ram Bagh, Sector-4, Rohini, New Delhi - 110 085
-                    </div>
-                 </div>
+                <div class='header'>
+    <div class='header-text'>
+        <img class = 'logo' src='${data.logo}' alt='logo' /> 
+      <h1>${data.companyName}</h1>
+    </div>
+    <div class='institute-info'>${data.highlight}</div>
+    <div class='contact-info'>
+      Contact&nbsp;: ${data.contact}&nbsp;&nbsp;/&nbsp;&nbsp;${data.altContact}<br>
+      Address: ${data.address}
+    </div>
+  </div>
             
             
             <div class="receipt-header">
-                <div>No: ${data.receiptno}</div>
+                <div>Receipt No: ${data.receiptno}</div>
                 <div>Date: ${formatToDDMMYYYY(data.createdAt)}</div>
             </div>
             
@@ -348,17 +356,24 @@ export const generateReceipt = async (
                     </div>
                 </div>
                 
-                <div class="balance-due">
-                    <strong>Balance Due: ₹${data.totalPayment} - ${data.discount} - ${data.payment}</strong>
-                </div>
+                <div class='balance-due'>
+  <strong>Balance Due: ₹${data.totalPayment - data.discount - data.payment}</strong>
+</div>
+
                 
-                <div class="note-section">
-                    <p><strong>Note:</strong> Cheque are Subject to Realization</p>
-                    <p><em>Fees Paid once are not refundable / Transferable</em></p>
+                <div class="note-section" style="margin-top: 1.5rem;">
+                  <strong>Note:</strong>
+                  <div style="margin-left:10px">
+                    ${notesHTML}
+                  </div>
+    
                 </div>
+
                 
                 <div class="signature-section">
-                    <strong>Authorized Signature</strong>
+                    <img class = 'signatureimg' src='${data.signature}' alt='signature image' />
+                    <hr/>
+                    <strong>Authorized&nbsp;Signature</strong>
                 </div>
             </div>
         </div>
@@ -368,7 +383,6 @@ export const generateReceipt = async (
 
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
-    // Calculate the height of the content
     const height = await page.evaluate(() => {
       const body = document.body;
       const html = document.documentElement;
@@ -381,37 +395,43 @@ export const generateReceipt = async (
       );
     });
 
-    // Generate PDF with dynamic height
-    const pdf = await page.pdf({
-      width: "800px", // Match your content width
-      height: `${height + 50}px`, // Add some padding
+    const pdfBuffer = await page.pdf({
+      width: "800px",
+      height: `${height + 50}px`,
       printBackground: true,
       pageRanges: "1",
-      margin: {
-        top: "0",
-        right: "0",
-        bottom: "0",
-        left: "0",
-      },
+      margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
 
-    // Create output directory if it doesn't exist
-    if (!fs.existsSync(outputPath)) {
-      fs.mkdirSync(outputPath, { recursive: true });
+    const fileKey = `${data.folder}/${data.firstName}/${Date.now()}_Receipt.pdf`;
+    const uploadParams = {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: fileKey,
+      Body: pdfBuffer,
+      ContentType: "application/pdf",
+    };
+
+    await s3Client.send(new PutObjectCommand(uploadParams));
+
+    const receiptUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+
+    const emailheader = data.companyName.trim(); // Trim to avoid extra spaces
+
+    try {
+      await resend.emails.send({
+        from: `${emailheader} <no-reply@t-rexinfotech.in>`,
+        to: [data.email],
+        subject: "Your Payment Receipt",
+        html: `<p>Hi ${data.firstName},</p><p>Thank you for your payment. You can download your receipt from the link below:</p><p><a href="${receiptUrl}">Download Receipt</a></p><p>Regards,<br>AICI Team</p>`,
+      });
+      console.log("Email sent successfully");
+    } catch (error) {
+      console.error("Failed to send email:", error);
+      throw error; // Rethrow or handle as needed
     }
 
-    // Generate filename based on student name and receipt number
-    const filename = `AICI_Bill_${data.firstName.replace(/\s+/g, "_")}_${data.receiptno}.pdf`;
-    const filePath = path.join(outputPath, filename);
-
-    // Write PDF to file
-    fs.writeFileSync(filePath, pdf);
-
-    console.log(`PDF saved to: ${filePath}`);
-    return filePath;
+    return receiptUrl;
   } finally {
     await browser.close();
   }
 };
-
-// Example usage:

@@ -95,6 +95,7 @@ export const AddUpdateStudent = async (req, res) => {
     const receiptdata = {
       receiptno: receiptno,
       student_id: data.student_id,
+      email : data.email,
       firstName: data.firstName,
       lastName: data.lastName,
       course: data.course,
@@ -102,12 +103,20 @@ export const AddUpdateStudent = async (req, res) => {
       discount: parseInt(data.discount),
       payment: parseInt(data.payment),
       paymentmode: data.paymentmode,
+
       createdAt: new Date(),
     };
 
+    if (data.chequeNo) {
+      receiptdata.chequeNo = data.chequeNo;
+    }
+
     await classesdb.collection("receipts").insertOne(receiptdata);
 
-    const receiptformat = await classesdb.collection("receiptformat").find({}).toArray();
+    const receiptformat = await classesdb
+      .collection("receiptformat")
+      .find({})
+      .toArray();
 
     await generateReceipt(receiptdata, receiptformat[0], "./generated_bills");
 

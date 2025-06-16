@@ -38,3 +38,4 @@ export const decryptData = (ciphertext, secretKey) => {
     throw new Error("Unsupported data type");
   }
 };
+

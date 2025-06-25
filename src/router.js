@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { AdminLogin } from "./controllers/login.js";
 // import { CheckUser } from "./middleware/auth.js";
-import { addAdmin } from "./controllers/admin.js";
+import { addOrUpdateAdmin, deleteAdmin, getAdmins } from "./controllers/admin.js";
 import {
   AddMultipleStudents,
   AddUpdateStudent,
   DeleteStudent,
+  GetPreviousYearsStudent,
   GetStudents,
 } from "./controllers/student.js";
 import multer from "multer";
@@ -19,6 +20,11 @@ import {
 import { AddCourse, DeleteCourse, GetCourses } from "./controllers/courses.js";
 import { AddUpdateReceipt, GetReceiptFormat } from "./controllers/receiptformat.js";
 import { AddUpdateCertificateFormat } from "./controllers/certificateformat.js";
+import { CloseEnquiry, CreateEnquiry, GetEnquiry } from "./controllers/enquiry.js";
+import { GetFeeHistoryofstudent, getPendingFeePerCourse, PayFees } from "./controllers/fee.js";
+import { getDashboardNumbers } from "./controllers/dashboard.js";
+import { addVisitor, getVisitorNumbers } from "./controllers/visitor.js";
+import { ResendReceipt } from "./controllers/receipt.js";
 
 // Initialize multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() }); // Store files in memory
@@ -26,7 +32,10 @@ const upload = multer({ storage: multer.memoryStorage() }); // Store files in me
 const approuter = Router();
 
 approuter.post("/api/adminlogin", AdminLogin);
-approuter.post("/api/createadmin", addAdmin);
+approuter.post("/api/addupdateadmin", addOrUpdateAdmin);
+approuter.get("/api/getadmins" , getAdmins);
+approuter.post("/api/deleteadmin" , deleteAdmin);
+
 
 //Student Routes
 approuter.post(
@@ -44,6 +53,7 @@ approuter.get("/api/getexams", getExams);
 approuter.post("/api/studentexamlogin", studentExamLogin);
 approuter.get("/api/getexamparticipants", getExamParticipants);
 approuter.post("/api/studentexamsubmit", studentExamSubmit);
+approuter.get("/api/getpreviousyearsstudents" , GetPreviousYearsStudent);
 
 
 //Courses Routes
@@ -51,7 +61,7 @@ approuter.post("/api/addupdatecourse", upload.single("image"), AddCourse);
 approuter.get("/api/getcourses", GetCourses);
 approuter.delete("/api/deletecourse", DeleteCourse);
 
-
+//Receipt Routes
 approuter.post(
   "/api/addupdatereceipt",
   upload.fields([
@@ -60,7 +70,8 @@ approuter.post(
   ]),
   AddUpdateReceipt
 );
-approuter.get("/api/getreceiptformat" , GetReceiptFormat)
+approuter.get("/api/getreceiptformat" , GetReceiptFormat);
+approuter.post("/api/resendreceipt" , ResendReceipt);
 
 approuter.post(
   "/api/addupdatecertificatedata",
@@ -71,5 +82,28 @@ approuter.post(
   AddUpdateCertificateFormat
  
 );
+
+// Enquiry
+approuter.post("/api/Sendenquiry" , CreateEnquiry );
+approuter.get("/api/getenquiries" , GetEnquiry);
+approuter.put("/api/closeenquiry", CloseEnquiry);
+
+// Fee Routes
+approuter.get("/api/getpendingfeepercourse" , getPendingFeePerCourse );
+approuter.get("/api/getfeehistoryofstudent", GetFeeHistoryofstudent );
+approuter.post("/api/payfees" , PayFees);
+
+
+// Dashboard Routes
+approuter.get("/api/getdashboardnumbers", getDashboardNumbers );
+
+
+// Visitor Routes
+approuter.post("/api/addvisitors" , addVisitor);
+approuter.get("/api/getvisitorsnumber" , getVisitorNumbers);
+approuter.get("/api/getvisitornumbers" , getVisitorNumbers);
+
+
+
 
 export default approuter;

@@ -72,7 +72,7 @@ export const AddCourse = async (req, res) => {
       .collection("courses")
       .findOne({}, { sort: { course_id: -1 } });
 
-    const course_id = LastCourse ? LastCourse.course_id + 1 : 100001;
+    const course_id = LastCourse ? LastCourse.course_id + 1 : 300001;
 
     const newCourse = {
       ...data,

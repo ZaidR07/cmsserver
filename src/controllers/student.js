@@ -9,12 +9,37 @@ export const AddUpdateStudent = async (req, res) => {
     const file = req.file;
     const data = req.body;
 
+    // ✅ Convert relevant fields to integers
+    const numericFields = [
+      "totalPayment",
+      "discount",
+      "payment",
+      "balance",
+      "numberOfInstallments",
+      "session",
+    ];
+
+    numericFields.forEach((field) => {
+      if (data[field] !== undefined && data[field] !== "") {
+        data[field] = parseInt(data[field]);
+        if (isNaN(data[field])) data[field] = 0;
+      }
+    });
+
+    // ✅ Convert installment amounts to integers
+    if (Array.isArray(data.installments)) {
+      data.installments = data.installments.map((item) => ({
+        amount: parseInt(item.amount),
+        dueDate: item.dueDate,
+      }));
+    }
+
     const db = mongoose.connection;
     const classesdb = db.useDb(data.folder, { useCache: true });
 
     let url = null;
 
-    // Handle file upload if file is present
+    // ✅ Handle file upload if present
     if (file) {
       const fileKey = `${data.folder}/${data.firstName}/${Date.now()}_${file.originalname}`;
       const uploadParams = {
@@ -25,22 +50,43 @@ export const AddUpdateStudent = async (req, res) => {
       };
 
       await s3Client.send(new PutObjectCommand(uploadParams));
-
       url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
     }
 
-    // Remove folder from data before saving to DB
+    // ✅ Remove fields not to be stored directly
     delete data.folder;
     delete data.status;
     delete data.form_no;
     delete data.exams;
 
-    // Convert any number fields if needed
     if (data.student_id) data.student_id = parseInt(data.student_id);
 
-    // UPDATE: If student_id is present
+    // =========================
+    // ✅ UPDATE FLOW
+    // =========================
     if (data.student_id) {
       delete data._id;
+
+      const protectedFields = [
+        "totalPayment",
+        "discount",
+        "payment",
+        "balance",
+        "chequeNo",
+        "paymentmode",
+        "otherPaymentMode",
+        "paymentPlan",
+        "numberOfInstallments",
+        "installmentFrequency",
+        "installments",
+        "active",
+        "createdAt",
+      ];
+
+      protectedFields.forEach((field) => {
+        delete data[field];
+      });
+
       const updateData = {
         ...data,
         updatedAt: new Date(),
@@ -73,7 +119,10 @@ export const AddUpdateStudent = async (req, res) => {
       });
     }
 
-    // ADD: If student_id not present, add a new student
+    // =========================
+    // ✅ ADD FLOW
+    // =========================
+
     const Laststudent = await classesdb
       .collection("students")
       .findOne({}, { sort: { student_id: -1 } });
@@ -84,32 +133,57 @@ export const AddUpdateStudent = async (req, res) => {
       .collection("form")
       .findOne({}, { sort: { form_no: -1 } });
 
-    const form_no = LastForm ? LastForm.form_no + 1 : 101;
+    const form_no = LastForm ? LastForm.form_no + 1 : 1;
 
-    const LastReceipt = await classesdb
-      .collection("form")
-      .findOne({}, { sort: { form_no: -1 } });
+    const LastReceipt = await classesdb.collection("receipts").findOne(
+      {},
+      {
+        sort: {
+          receiptno: -1,
+        },
+      }
+    );
 
     const receiptno = LastReceipt ? LastReceipt.receiptno + 1 : 101;
 
+    const lastFee = await classesdb
+      .collection("fees")
+      .findOne({}, { sort: { fee_id: -1 } });
+
+    const newFeeId = lastFee ? lastFee.fee_id + 1 : 400001;
+
     const receiptdata = {
-      receiptno: receiptno,
-      student_id: data.student_id,
-      email : data.email,
+      receiptno,
+      student_id,
+      fee_id: newFeeId,
+      email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
       course: data.course,
-      totalPayment: parseInt(data.totalPayment),
-      discount: parseInt(data.discount),
-      payment: parseInt(data.payment),
+      totalPayment: data.totalPayment,
+      discount: data.discount,
+      payment: data.payment,
+      balance : data.balance,
       paymentmode: data.paymentmode,
-
       createdAt: new Date(),
     };
 
     if (data.chequeNo) {
       receiptdata.chequeNo = data.chequeNo;
     }
+
+    const feeDocument = {
+      student_id,
+      receiptno,
+      amount: data.payment,
+      paymentmode: data.paymentmode,
+      chequeNo: data.chequeNo,
+      remark: "Admission",
+      fee_id: newFeeId,
+      date: new Date(),
+    };
+
+    await classesdb.collection("fees").insertOne(feeDocument);
 
     await classesdb.collection("receipts").insertOne(receiptdata);
 
@@ -121,16 +195,14 @@ export const AddUpdateStudent = async (req, res) => {
     await generateReceipt(receiptdata, receiptformat[0], "./generated_bills");
 
     delete data.paymentmode;
-    if (data?.chequeNo) {
-      delete data.chequeNo;
-    }
+    if (data.chequeNo) delete data.chequeNo;
 
     const newStudent = {
       ...data,
       student_id,
       form_no,
       imageUrl: url,
-      status: true,
+      active: true,
       createdAt: new Date(),
     };
 
@@ -141,7 +213,7 @@ export const AddUpdateStudent = async (req, res) => {
       insertedId: result.insertedId,
     });
   } catch (error) {
-    logger.error("Error Adding/Updating Student:", error);
+    logger?.error?.("Error Adding/Updating Student:", error);
     return res.status(500).json({ message: "Failed to add or update student" });
   }
 };
@@ -179,7 +251,7 @@ export const AddMultipleStudents = async (req, res) => {
         ...student,
         student_id: nextStudentId++,
         form_no: nextFormNo++,
-        status: true, // optional: default to active
+        active: true, // optional: default to active
       };
       return newStudent;
     });
@@ -205,7 +277,7 @@ export const GetStudents = async (req, res) => {
 
     if (!db) {
       return res.status(400).json({
-        message: "Rquired Field is Missing",
+        message: "Required Field is Missing",
       });
     }
 
@@ -214,19 +286,94 @@ export const GetStudents = async (req, res) => {
     // Switching Database
     const classesdb = database.useDb(db, { useCache: true });
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    // Define May 30 of current year
+    const cutoffDate = new Date(`${currentYear}-05-30`);
+
     const students = await classesdb
       .collection("students")
-      .find({ status: true })
+      .find({ active: true })
       .toArray();
 
-    if (!students || students.length === 0) {
+    const filteredstudents = students.filter((item) => {
+      const sessionYear = parseInt(item.session);
+      if (isNaN(sessionYear)) return false;
+
+      if (sessionYear > currentYear) {
+        return true;
+      } else if (sessionYear == currentYear) {
+        return now <= cutoffDate;
+      }
+      return false;
+    });
+
+    console.log(filteredstudents);
+
+    if (filteredstudents.length === 0) {
       return res.status(404).json({
         message: "No Students Found",
       });
     }
 
     return res.status(200).json({
-      payload: students,
+      payload: filteredstudents,
+    });
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const GetPreviousYearsStudent = async (req, res) => {
+  try {
+    const { db } = req.query;
+
+    if (!db) {
+      return res.status(400).json({
+        message: "Required Field is Missing",
+      });
+    }
+
+    const database = mongoose.connection;
+
+    // Switching Database
+    const classesdb = database.useDb(db, { useCache: true });
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const cutoffDate = new Date(`${currentYear}-05-30`);
+
+    const students = await classesdb
+      .collection("students")
+      .find({
+        active: true,
+      })
+      .toArray();
+
+    const filteredstudents = students.filter((item) => {
+      const sessionYear = parseInt(item.session);
+      if (isNaN(sessionYear)) return false;
+
+      if (sessionYear < currentYear) {
+        return true;
+      } else if (sessionYear === currentYear) {
+        return now <= cutoffDate; // include if today is before or on 30 May
+      }
+      return false;
+    });
+
+    if (filteredstudents.length === 0) {
+      return res.status(404).json({
+        message: "No Students Found",
+      });
+    }
+
+    return res.status(200).json({
+      payload: filteredstudents,
     });
   } catch (error) {
     logger.error(error);
@@ -252,7 +399,7 @@ export const DeleteStudent = async (req, res) => {
 
     const result = await classesdb
       .collection("students")
-      .updateOne({ student_id }, { $set: { status: false } });
+      .updateOne({ student_id }, { $set: { active: false } });
 
     if (result.matchedCount === 0) {
       return res.status(404).json({

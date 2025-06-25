@@ -108,6 +108,8 @@ export const studentExamLogin = async (req, res) => {
       .collection("students")
       .findOne({ student_id: parsedStudentId });
 
+    console.log(student);
+
     if (!student) {
       return res.status(403).json({
         message: "Incorrect Student ID",
@@ -221,7 +223,9 @@ export const getExamParticipants = async (req, res) => {
       .find({ student_id: { $in: participantIds } })
       .toArray();
 
-    return res.status(200).json({ payload: { exam: exam, participants : students } });
+    return res
+      .status(200)
+      .json({ payload: { exam: exam, participants: students } });
   } catch (error) {
     console.error("Error fetching exam participants:", error);
     return res.status(500).json({ message: "Internal server error" });

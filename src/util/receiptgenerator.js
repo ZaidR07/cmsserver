@@ -108,6 +108,7 @@ export const generateReceipt = async (
       }
     }
 
+    
     const notesHTML = data.notes
       .map(
         (note) =>
@@ -115,271 +116,31 @@ export const generateReceipt = async (
       )
       .join("");
 
-    const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>AICI Computer Institute Bill</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-color: white;
-            }
-            
-            .bill-container {
-                max-width: 800px;
-                margin: 0 auto;
-                border: 2px solid #000;
-                background-color: white;
-            }
-            
-            .header {
-              
-              padding: 10px;
-              border-bottom: 2px solid #000;
-            }
-
-            
-            .header img {
-                max-width: 100%;
-                height: auto;
-            }
-            
-            .header-text {
-            display: flex;
-              justify-content: center;
-              gap: 5%;
-                background-color: ${data.headerBackground};
-                color: ${data.headerColor};
-                padding: 15px;
-                margin: 10px 0;
-                font-weight: bold;
-                font-size: 20px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-            }
-
-            .logo{
-              width : 20%;
-              max-height : 20vw;
-            }
-
-            .signatureimg{
-              width : 20%;
-              max-height : 20vw;
-            }
-            
-            .institute-info {
-                 background-color: ${data.secondHeaderBackground};
-                color: white;
-                padding: 8px;
-                font-size: 12px;
-                text-align: center;
-            }
-            
-            .contact-info {
-                background-color: #f0f0f0;
-                padding: 8px;
-                font-size: 12px;
-                text-align: center;
-                border-bottom: 1px solid #ccc;
-            }
-            
-            .receipt-header {
-                display: flex;
-                justify-content: space-between;
-                padding: 15px;
-                font-weight: bold;
-                border-bottom: 1px solid #ccc;
-            }
-            
-            .form-section {
-                padding: 20px;
-            }
-            
-            .form-row {
-                display: flex;
-                margin-bottom: 15px;
-                align-items: center;
-            }
-            
-            .form-label {
-                font-weight: bold;
-                margin-right: 10px;
-                min-width: 150px;
-            }
-            
-            .form-input {
-                border: none;
-                border-bottom: 1px solid #000;
-                padding: 5px;
-                flex: 1;
-                margin-right: 20px;
-            }
-            
-            .payment-section {
-                display: flex;
-                align-items: center;
-                gap: 20px;
-                margin-bottom: 15px;
-            }
-            
-            .payment-method {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-            }
-            
-            .checkbox {
-                width: 15px;
-                height: 15px;
-                border: 1px solid #000;
-                display: inline-block;
-                text-align: center;
-                line-height: 13px;
-                font-size: 12px;
-            }
-            
-            .checked {
-                background-color: #000;
-                color: white;
-            }
-            
-            .amount-section {
-                text-align: right;
-                margin-top: 20px;
-            }
-            
-            .fee-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 15px;
-            }
-            
-            .fee-table th,
-            .fee-table td {
-                border: 1px solid #000;
-                padding: 8px;
-                text-align: center;
-            }
-            
-            .fee-table th {
-                background-color: #f0f0f0;
-                font-weight: bold;
-            }
-            
-            .note-section {
-                margin-top: 20px;
-                font-size: 16px;
-            }
-            
-            .signature-section {
-                width : 20%;
-                margin-left: 75%;
-                text-align: center;
-                
-               
-            }
-            
-            .balance-due {
-                background-color: #fffacd;
-                padding: 10px;
-                border: 1px solid #ddd;
-                margin-top: 15px;
-                text-align: right;
-                font-weight: bold;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="bill-container">
-                <div class='header'>
-    <div class='header-text'>
-        <img class = 'logo' src='${data.logo}' alt='logo' /> 
-      <h1>${data.companyName}</h1>
-    </div>
-    <div class='institute-info'>${data.highlight}</div>
-    <div class='contact-info'>
-      Contact&nbsp;: ${data.contact}&nbsp;&nbsp;/&nbsp;&nbsp;${data.altContact}<br>
-      Address: ${data.address}
-    </div>
-  </div>
-            
-            
-            <div class="receipt-header">
-                <div>Receipt No: ${data.receiptno}</div>
-                <div>Date: ${formatToDDMMYYYY(data.createdAt)}</div>
-            </div>
-            
-            <div class="form-section">
-                <div class="form-row">
-                    <span class="form-label">Received with thanks from:</span>
-                    <span class="form-input">${data.firstName} ${
-                      data.lastName
-                    }</span>
-                </div>
-                
-                <div class="form-row">
-                    <span class="form-label">the sum of Rupees:</span>
-                    <span class="form-input">${numberToWords(
-                      data.payment
-                    )} Only</span>
-                </div>
-                
-                <div class="payment-section">
-                    <span class="form-label">Paid by:</span>
-                    <div class="payment-method">
-                        <span class="checkbox ${data.paymentmode === "Cash" ? "checked" : ""}">
-                            ${data.paymentmode === "Cash" ? "✓" : ""}
-                        </span>
-                        <span>Cash</span>
-                    </div>
-                    <div class="payment-method">
-                        <span class="checkbox ${data.paymentmode === "UPI" ? "checked" : ""}">
-                            ${data.paymentmode === "UPI" ? "✓" : ""}
-                        </span>
-                        <span>UPI</span>
-                    </div>
-                    <div class="payment-method">
-                        <span class="checkbox ${data.paymentmode === "Cheque" ? "checked" : ""}">
-                            ${data.paymentmode === "Cheque" ? "✓" : ""}
-                        </span>
-                        <span>Cheque</span>
-                    </div>
-                    <div class="payment-method">
-                        <span>No:</span>
-                        <span class="form-input" style="width: 100px;">${data.chequeNo || ""}</span>
-                    </div>
-                </div>
-                
-                <div class='balance-due'>
-  <strong>Balance Due: ₹${data.totalPayment - data.discount - data.payment}</strong>
-</div>
-
-                
-                <div class="note-section" style="margin-top: 1.5rem;">
-                  <strong>Note:</strong>
-                  <div style="margin-left:10px">
-                    ${notesHTML}
-                  </div>
-    
-                </div>
-
-                
-                <div class="signature-section">
-                    <img class = 'signatureimg' src='${data.signature}' alt='signature image' />
-                    <hr/>
-                    <strong>Authorized&nbsp;Signature</strong>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
+    const htmlContent = receiptformat.template
+      .replace('${data.logo}', data.logo)
+      .replace('${data.companyName}', data.companyName)
+      .replace('${data.highlight}', data.highlight)
+      .replace('${data.contact}', data.contact)
+      .replace('${data.altContact}', data.altContact)
+      .replace('${data.address}', data.address)
+      .replace('${data.receiptno}', data.receiptno)
+      .replace('${formatToDDMMYYYY(data.createdAt)}', formatToDDMMYYYY(data.createdAt))
+      .replace('${data.firstName}', data.firstName)
+      .replace('${data.lastName}', data.lastName)
+      .replace('${numberToWords(data.payment)}', numberToWords(data.payment))
+      .replace('${data.paymentmode === "Cash" ? "checked" : ""}', data.paymentmode === "Cash" ? "checked" : "")
+      .replace('${data.paymentmode === "Cash" ? "✓" : ""}', data.paymentmode === "Cash" ? "✓" : "")
+      .replace('${data.paymentmode === "UPI" ? "checked" : ""}', data.paymentmode === "UPI" ? "checked" : "")
+      .replace('${data.paymentmode === "UPI" ? "✓" : ""}', data.paymentmode === "UPI" ? "✓" : "")
+      .replace('${data.paymentmode === "Cheque" ? "checked" : ""}', data.paymentmode === "Cheque" ? "checked" : "")
+      .replace('${data.paymentmode === "Cheque" ? "✓" : ""}', data.paymentmode === "Cheque" ? "✓" : "")
+      .replace('${data.chequeNo}', data.chequeNo || "")
+      .replace('${data.balance}', data.balance)
+      .replace('${notesHTML}', notesHTML)
+      .replace('${data.signature}', data.signature)
+      .replace('${data.headerBackground}', data.headerBackground)
+      .replace('${data.headerColor}', data.headerColor)
+      .replace('${data.secondHeaderBackground}', data.secondHeaderBackground);
 
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });
 
@@ -422,7 +183,7 @@ export const generateReceipt = async (
         from: `${emailheader} <no-reply@t-rexinfotech.in>`,
         to: [data.email],
         subject: "Your Payment Receipt",
-        html: `<p>Hi ${data.firstName},</p><p>Thank you for your payment. You can download your receipt from the link below:</p><p><a href="${receiptUrl}">Download Receipt</a></p><p>Regards,<br>AICI Team</p>`,
+        html: `<p>Hi ${data.firstName},</p><p>Thank you for your payment. You can download your receipt from the link below:</p><p><a href="${receiptUrl}">Download Receipt</a></p><p>Regards,<br>${data.companyName} Team</p>`,
       });
       console.log("Email sent successfully");
     } catch (error) {

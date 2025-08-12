@@ -1,4 +1,4 @@
-"use client"
+
 
 import mongoose from 'mongoose';
 import { logger } from '../logger.js';
@@ -54,10 +54,11 @@ export const AdminLogin = async (req, res) => {
 
         // Switch to the client-specific database
         const clientDb = mainDb.useDb(clientDbName, { useCache: true });
+        
 
         // Example: Query the admins collection in the client-specific database
         const admin = await clientDb.collection('admin').findOne({
-           email  : admin_id
+           admin_id  : admin_id
         });
 
        
@@ -89,7 +90,7 @@ export const AdminLogin = async (req, res) => {
             payload: {
                 rank : encrytedrank,
                 db : encryteddbname,
-                email : admin_id
+                admin_id : admin_id
             },
         });
 

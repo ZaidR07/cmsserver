@@ -37,9 +37,55 @@ export const ResendReceipt = async (req, res) => {
       message: "Receipt Sent Successfully",
     });
   } catch (error) {
-    logger.error(error)
+    logger.error(error);
     return res.status(500).json({
-        message : "Internal Server Error"
-    })
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const PrintReceipt = async (req, res) => {
+  try {
+    const { db, receiptno } = req.body;
+
+    
+
+    if (!db || !receiptno) {
+      return res.status(400).json({
+        message: "Required Fields are Missing",
+      });
+    }
+
+    const database = mongoose.connection;
+    const clientdb = database.useDb(db, { useCache: true });
+
+    if (!clientdb.name) {
+      return res.status(500).json({
+        message: "Internal Server Error/db",
+      });
+    }
+
+    // Get receipt data
+    const receiptdata = await clientdb.collection("receipts").findOne({
+      receiptno: receiptno,
+    });
+
+    console.log(receiptdata);
+    
+
+    if (!receiptdata) {
+      return res.status(404).json({
+        message: "Receipt not found",
+      });
+    }
+
+    return res.status(200).json({
+      url: receiptdata.receiptUrl,
+    });
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };

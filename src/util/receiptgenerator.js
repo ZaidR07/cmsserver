@@ -116,6 +116,8 @@ export const generateReceipt = async (
       )
       .join("");
 
+      
+
     const htmlContent = receiptformat.template
       .replace('${data.logo}', data.logo)
       .replace('${data.companyName}', data.companyName)
@@ -185,7 +187,7 @@ export const generateReceipt = async (
         subject: "Your Payment Receipt",
         html: `<p>Hi ${data.firstName},</p><p>Thank you for your payment. You can download your receipt from the link below:</p><p><a href="${receiptUrl}">Download Receipt</a></p><p>Regards,<br>${data.companyName} Team</p>`,
       });
-      console.log("Email sent successfully");
+ 
     } catch (error) {
       console.error("Failed to send email:", error);
       throw error; // Rethrow or handle as needed

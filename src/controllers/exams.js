@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { logger } from "../logger.js";
 
 function generatePassword() {
-  const prefix = "aici";
+  const prefix = "pass";
   const randomNumber = Math.floor(1000 + Math.random() * 9000); // ensures a 4-digit number
   return prefix + randomNumber;
 }
@@ -63,7 +63,12 @@ export const getExams = async (req, res) => {
 
     const classesdb = db.useDb(dbname, { useCache: true });
 
-    const exams = await classesdb.collection("exams").find({}).toArray();
+     // Fetch exams and sort by createdAt in descending order (newest first)
+    const exams = await classesdb
+      .collection("exams")
+      .find({})
+      .sort({ exam_id : -1 }) // Sort by createdAt in descending order
+      .toArray();
 
     if (!exams || exams?.length < 0) {
       return res.status(404).json({

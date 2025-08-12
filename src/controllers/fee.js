@@ -35,32 +35,58 @@ export const getPendingFeePerCourse = async (req, res) => {
         const totalFees = parseFloat(student.totalPayment) || 0;
         const paidFees = parseFloat(student.payment) || 0;
         const balanceFees = student.balance;
+        const paymentPlan = student.paymentPlan || "full"; // Default to 'full' if not specified
 
         let status = "fully-paid";
         let dueDate = null;
+        let dueAmount = 0;
 
         const hasInstallments =
           Array.isArray(student.installments) &&
           student.installments.length > 0;
 
-        if (hasInstallments) {
+        if (paymentPlan === "full") {
+          // Full payment plan logic
+          status = balanceFees <= 0 ? "fully-paid" : "partially-paid";
+        } else if (hasInstallments) {
+          // Sort installments by due date (ascending)
           const sortedInstallments = [...student.installments].sort(
             (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
           );
 
-          dueDate = sortedInstallments[0]?.dueDate || null;
+          // Find all unpaid installments (both past and future)
+          const unpaidInstallments = sortedInstallments.filter(
+            (inst) => !inst.paid
+          );
 
-          const hasOverdue = sortedInstallments.some((installment) => {
-            const installmentDue = new Date(installment.dueDate);
+          if (unpaidInstallments.length > 0) {
+            // Find the earliest unpaid installment
+            const nextDueInstallment = unpaidInstallments[0];
+            dueDate = nextDueInstallment.dueDate;
+            dueAmount = nextDueInstallment.amount;
+
+            // Check if this installment is overdue
+            const installmentDue = new Date(nextDueInstallment.dueDate);
             installmentDue.setHours(0, 0, 0, 0);
-            return installmentDue < today;
-          });
 
-          if (hasOverdue) {
-            status = "due";
-          } else if (balanceFees > 0) {
-            status = "partially-paid";
+            if (installmentDue < today) {
+              status = "overdue";
+            } else {
+              // Check if there are any paid installments
+              const hasPaidInstallments = sortedInstallments.some(
+                (inst) => inst.paid
+              );
+              status = hasPaidInstallments
+                ? "partially-paid"
+                : "partially-paid"; // Changed from 'unpaid' to 'partially-paid'
+            }
+          } else {
+            // All installments paid
+            status = "fully-paid";
           }
+        } else {
+          // No installments but not full payment plan
+          status = balanceFees <= 0 ? "fully-paid" : "partially-paid"; // Changed from 'unpaid' to 'partially-paid'
         }
 
         return {
@@ -70,21 +96,32 @@ export const getPendingFeePerCourse = async (req, res) => {
           altnumber: student.altnumber,
           admissionDate: student.date,
           totalFees,
+          paidFees,
           balanceFees,
           dueDate,
+          dueAmount,
           status,
+          paymentPlan,
         };
       });
 
-      // Only count students who are overdue
-      const pendingCount = formattedStudents.filter(
-        (s) => s.status === "due"
-      ).length;
+      // Count students by status for this course (only overdue, partially-paid, fully-paid)
+      const statusCounts = formattedStudents.reduce(
+        (acc, student) => {
+          acc[student.status] = (acc[student.status] || 0) + 1;
+          return acc;
+        },
+        {
+          overdue: 0,
+          "partially-paid": 0,
+          "fully-paid": 0,
+        }
+      );
 
       return {
         id: course._id,
         courseName: course.course_name,
-        pendingCount,
+        statusCounts,
         students: formattedStudents,
       };
     });
@@ -123,8 +160,27 @@ export const GetFeeHistoryofstudent = async (req, res) => {
       })
       .toArray();
 
+    const student = await clientDb
+      .collection("students")
+      .find({
+        student_id: parseInt(student_id),
+      })
+      .toArray();
+
+    const discounts = await clientDb
+      .collection("discounts")
+      .find({
+        student_id: parseInt(student_id),
+      })
+      .toArray();
+
     return res.status(200).json({
-      payload: fees,
+      payload: {
+        fees: fees,
+        installments: student[0].installments,
+        exemptions: student[0].exemptions,
+        discounts: discounts,
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -137,13 +193,19 @@ export const PayFees = async (req, res) => {
   try {
     const { payload } = req.body;
 
-    if (!payload || !payload.student_id || !payload.db || !payload.amount) {
+    if (
+      !payload ||
+      !payload.student_id ||
+      !payload.db ||
+      !payload.amount ||
+      !payload.paymentmode
+    ) {
       return res.status(400).json({
         message: "Required Fields are Missing",
       });
     }
 
-    const { student_id, db } = payload;
+    const { student_id, db, installments: paidInstallments = [] } = payload;
     const data = { ...payload };
     const amount = Number(data.amount);
 
@@ -168,6 +230,33 @@ export const PayFees = async (req, res) => {
     const currentBalance = Number(student.balance || 0);
     const newBalance = currentBalance - amount;
 
+    // Process installments if provided
+    let updatedInstallments = student.installments || [];
+    if (paidInstallments && paidInstallments.length > 0) {
+      // Create a map of paid installments for easy lookup
+      const paidInstallmentsMap = new Map();
+      paidInstallments.forEach((inst) => {
+        paidInstallmentsMap.set(inst.installmentno, inst.amount);
+      });
+
+      // Process each installment in student's record
+      updatedInstallments = updatedInstallments
+        .map((installment) => {
+          const paidAmount = paidInstallmentsMap.get(installment.installmentno);
+          if (paidAmount) {
+            // If installment is fully paid, it will be removed (filtered out later)
+            // If partially paid, reduce the amount
+            const newAmount = installment.amount - paidAmount;
+            return { ...installment, amount: newAmount };
+          }
+          return installment;
+        })
+        .filter((installment) => {
+          // Remove fully paid installments (amount <= 0)
+          return installment.amount > 0;
+        });
+    }
+
     const lastFee = await clientdb
       .collection("fees")
       .findOne({}, { sort: { fee_id: -1 } });
@@ -190,32 +279,40 @@ export const PayFees = async (req, res) => {
     const feeDocument = {
       ...data,
       student_id,
-      receiptno : receiptno,
+      receiptno: receiptno,
       fee_id: newFeeId,
       date: new Date(),
     };
 
     await clientdb.collection("fees").insertOne(feeDocument);
 
-    await clientdb.collection("students").updateOne(
-      { student_id },
-      {
-        $set: {
-          balance: newBalance,
-          status: newBalance <= 0 ? "fully-paid" : "partially-paid",
+    // Update student with new balance and installments
+    const updateData = {
+      $set: {
+        balance: newBalance,
+        status: newBalance <= 0 ? "fully-paid" : "partially-paid",
+        installments: updatedInstallments,
+      },
+      $push: {
+        fees: {
+          fee_id: newFeeId,
+          amount: amount,
+          date: new Date(),
+          mode: data.mode || data.paymentmode || "Cash",
+          note: data.note || "",
         },
-        $push: {
-          fees: {
-            fee_id: newFeeId,
-            amount: amount,
-            date: new Date(),
-            mode: data.mode || data.paymentmode || "Cash",
-            note: data.note || "",
-          },
-        },
-      }
-    );
+      },
+    };
 
+    await clientdb.collection("students").updateOne({ student_id }, updateData);
+
+
+    const receiptformat = await clientdb
+      .collection("receiptformat")
+      .find({})
+      .toArray();
+
+       
     const receiptdata = {
       receiptno,
       student_id,
@@ -231,20 +328,19 @@ export const PayFees = async (req, res) => {
       paymentmode: data.paymentmode,
       chequeNo: data.chequeNo || "",
       createdAt: new Date(),
+      paidInstallments: paidInstallments, // Include paid installments in receipt
     };
 
+    const receipt =  await generateReceipt(receiptdata, receiptformat[0], "./generated_bills");
+
+    receiptdata.receiptUrl = receipt
+
     await clientdb.collection("receipts").insertOne(receiptdata);
-
-    const receiptformat = await clientdb
-      .collection("receiptformat")
-      .find({})
-      .toArray();
-
-    await generateReceipt(receiptdata, receiptformat[0], "./generated_bills");
 
     return res.status(200).json({
       message: "Fees paid Successfully",
       fee_id: newFeeId,
+      updatedInstallments: updatedInstallments,
     });
   } catch (error) {
     logger.error("Internal Server Error", error);
@@ -254,5 +350,3 @@ export const PayFees = async (req, res) => {
     });
   }
 };
-
-
